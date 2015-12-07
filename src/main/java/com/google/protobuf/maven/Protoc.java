@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableSet;
  * compiler. The actual executable is invoked using the plexus
  * {@link Commandline}.
  * <p/>
- * 
+ *
  * @author gak@google.com (Gregory Kick)
  * @author uismail@ea.com (Usman Ismail)
  */
@@ -38,7 +38,7 @@ final class Protoc {
 	/**
 	 * Constructs a new instance. This should only be used by the
 	 * {@link Builder}.
-	 * 
+	 *
 	 * @param executable
 	 *            The path to the {@code protoc} executable.
 	 * @param protoPath
@@ -52,7 +52,7 @@ final class Protoc {
 	 *            session
 	 */
 	private Protoc(String executable, ImmutableSet<File> protoPath, ImmutableSet<File> protoFiles,
-			File outputDirectory, Language language) {
+				   File outputDirectory, Language language) {
 		this.executable = checkNotNull(executable, "executable");
 		this.protoPathElements = checkNotNull(protoPath, "protoPath");
 		this.protoFiles = checkNotNull(protoFiles, "protoFiles");
@@ -60,13 +60,12 @@ final class Protoc {
 		this.language = checkNotNull(language, "language");
 		this.error = new CommandLineUtils.StringStreamConsumer();
 		this.output = new CommandLineUtils.StringStreamConsumer();
-
 	}
 
 	/**
 	 * Invokes the {@code protoc} compiler using the configuration specified at
 	 * construction.
-	 * 
+	 *
 	 * @return The exit status of {@code protoc}.
 	 * @throws CommandLineException
 	 */
@@ -81,7 +80,7 @@ final class Protoc {
 	 * Creates the command line arguments.
 	 * <p/>
 	 * This method has been made visible for testing only.
-	 * 
+	 *
 	 * @return A list consisting of the executable followed by any arguments.
 	 */
 	ImmutableList<String> buildProtocCommand() {
@@ -113,7 +112,7 @@ final class Protoc {
 
 	/**
 	 * This class builds {@link Protoc} instances.
-	 * 
+	 *
 	 * @author gak@google.com (Gregory Kick)
 	 */
 	static final class Builder {
@@ -122,11 +121,10 @@ final class Protoc {
 		private Set<File> protopathElements;
 		private Set<File> protoFiles;
 		private final Language language;
-
 		/**
 		 * Constructs a new builder. The two parameters are present as they are
 		 * required for all {@link Protoc} instances.
-		 * 
+		 *
 		 * @param executable
 		 *            The path to the {@code protoc} executable.
 		 * @param outputDirectory
@@ -151,7 +149,7 @@ final class Protoc {
 		 * Adds a proto file to be compiled. Proto files must be on the
 		 * protopath and this method will fail if a proto file is added without
 		 * first adding a parent directory to the protopath.
-		 * 
+		 *
 		 * @param protoFile
 		 * @return The builder.
 		 * @throws IllegalStateException
@@ -196,7 +194,7 @@ final class Protoc {
 
 		/**
 		 * Adds the {@code protopathElement} to the protopath.
-		 * 
+		 *
 		 * @param protopathElement
 		 *            A directory to be searched for imported protocol buffer
 		 *            definitions.

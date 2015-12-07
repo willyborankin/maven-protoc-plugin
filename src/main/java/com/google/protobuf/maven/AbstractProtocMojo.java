@@ -42,7 +42,7 @@ import com.google.common.collect.ImmutableSet;
  * and {@link com.google.protobuf.maven.ProtocTestCompileMojo} in order to
  * override the specific configuration for compiling the main or test classes
  * respectively.
- * 
+ *
  * @author Gregory Kick
  * @author David Trott
  * @author Brice Figureau
@@ -55,7 +55,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 
 	/**
 	 * The current Maven project.
-	 * 
+	 *
 	 * @parameter default-value="${project}"
 	 * @readonly
 	 * @required
@@ -64,7 +64,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 
 	/**
 	 * A helper used to add resources to the project.
-	 * 
+	 *
 	 * @component
 	 * @required
 	 */
@@ -73,11 +73,16 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 	/**
 	 * This is the path to the {@code protoc} executable. By default it will
 	 * search the {@code $PATH}.
-	 * 
+	 *
 	 * @parameter default-value="protoc"
 	 * @required
 	 */
 	private String protocExecutable;
+
+	/**
+	 * @parameter default-value=false
+	 */
+	private boolean removePreviouslyGeneratedObjects;
 
 	/**
 	 * @parameter
@@ -88,7 +93,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 	 * Since {@code protoc} cannot access jars, proto files in dependencies are
 	 * extracted to this location and deleted on exit. This directory is always
 	 * cleaned during execution.
-	 * 
+	 *
 	 * @parameter expression="${project.build.directory}/protoc-dependencies"
 	 * @required
 	 */
@@ -96,7 +101,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 
 	/**
 	 * This is the path to the local maven {@code repository}.
-	 * 
+	 *
 	 * @parameter default-value="${localRepository}"
 	 * @required
 	 */
@@ -109,7 +114,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 	 * files. Normally these paths are hashed (MD5) to avoid issues with long
 	 * file names on windows. However if this property is set to {@code false}
 	 * longer paths will be used.
-	 * 
+	 *
 	 * @parameter default-value="true"
 	 * @required
 	 */
@@ -159,8 +164,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 		try {
 			ImmutableSet<File> protoFiles = this.findProtoFilesInDirectory(protoSourceRoot);
 			final File outputDirectory = this.getOutputDirectory(langSpec.getLanguage());
-			ImmutableSet<File> outputFiles = this.findGeneratedFilesInDirectory(this.getOutputDirectory(langSpec
-					.getLanguage()));
+			ImmutableSet<File> outputFiles = this.findGeneratedFilesInDirectory(this.getOutputDirectory(langSpec.getLanguage()));
 
 			if (protoFiles.isEmpty()) {
 				this.getLog().info("No proto files to compile.");
@@ -175,12 +179,17 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 
 				// Quick fix to fix issues with two mvn installs in a row (ie no
 				// clean)
-				cleanDirectory(outputDirectory);
+				if (removePreviouslyGeneratedObjects)
+					cleanDirectory(outputDirectory);
 
 				Protoc protoc = new Protoc.Builder(this.protocExecutable, outputDirectory, langSpec.getLanguage())
-				.addProtoPathElement(protoSourceRoot).addProtoPathElements(derivedProtoPathElements)
-				.addProtoPathElements(asList(this.additionalProtoPathElements)).addProtoFiles(protoFiles)
-				.build();
+						.addProtoPathElement(protoSourceRoot)
+						.addProtoPathElements(derivedProtoPathElements)
+						.addProtoPathElements(asList(this.additionalProtoPathElements))
+						.addProtoFiles(protoFiles)
+						.build();
+				for (File f : protoFiles)
+					getLog().info("File to compile: " + f.getAbsolutePath());
 				final int exitStatus = protoc.compile();
 				if (exitStatus != 0) {
 					this.getLog().error("protoc failed output: " + protoc.getOutput());
@@ -250,7 +259,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 
 	/**
 	 * Gets the {@link File} for each dependency artifact.
-	 * 
+	 *
 	 * @return A set of all dependency artifacts.
 	 */
 	private ImmutableSet<File> getDependencyArtifactFiles() {
@@ -333,7 +342,7 @@ abstract class AbstractProtocMojo extends AbstractMojo {
 	/**
 	 * Truncates the path of jar files so that they are relative to the local
 	 * repository.
-	 * 
+	 *
 	 * @param jarPath
 	 *            the full path of a jar file.
 	 * @return the truncated path relative to the local repository or root of
